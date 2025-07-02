@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>KaniTime - Site Blocked</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+			height: 100vh;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+		}
+
+		.container {
+			max-width: 600px;
+			padding: 40px;
+			background: rgba(255, 255, 255, 0.1);
+			border-radius: 20px;
+			backdrop-filter: blur(10px);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+		}
+
+		.crab {
+			font-size: 80px;
+			margin-bottom: 20px;
+			animation: wave 2s ease-in-out infinite;
+		}
+
+		@keyframes wave {
+
+			0%,
+			100% {
+				transform: rotate(0deg);
+			}
+
+			25% {
+				transform: rotate(-10deg);
+			}
+
+			75% {
+				transform: rotate(10deg);
+			}
+		}
+
+		h1 {
+			font-size: 48px;
+			margin-bottom: 20px;
+			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+		}
+
+		.message {
+			font-size: 24px;
+			margin-bottom: 30px;
+			opacity: 0.9;
+		}
+
+		.sub-message {
+			font-size: 18px;
+			margin-bottom: 40px;
+			opacity: 0.8;
+		}
+
+		.cta {
+			background: rgba(255, 255, 255, 0.2);
+			border: 2px solid rgba(255, 255, 255, 0.3);
+			color: white;
+			padding: 15px 30px;
+			font-size: 18px;
+			border-radius: 30px;
+			cursor: pointer;
+			transition: all 0.3s;
+			text-decoration: none;
+			display: inline-block;
+		}
+
+		.cta:hover {
+			background: rgba(255, 255, 255, 0.3);
+			transform: translateY(-2px);
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+		}
+
+		.stats {
+			margin-top: 30px;
+			padding: 20px;
+			background: rgba(255, 255, 255, 0.1);
+			border-radius: 10px;
+			font-size: 16px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<div class="crab">🦀</div>
+		<h1>Site Blocked!</h1>
+		<div class="message">You need more internet time!</div>
+		<div class="sub-message">
+			Complete WaniKani reviews to earn more browsing time.<br>
+			<strong>1 review = 30 seconds</strong>
+		</div>
+
+		<a href="https://www.wanikani.com/review" class="cta" target="_blank">
+			📚 Go to WaniKani Reviews
+		</a>
+
+		<div class="stats">
+			<p>💡 <strong>Tip:</strong> Click the KaniTime extension icon to check your current time balance
+				and manually refresh your review count!</p>
+		</div>
+	</div>
+
+	<script>
+		// Auto-refresh every 30 seconds to check if time is available
+		setTimeout(() => {
+			location.reload();
+		}, 30000);
+	</script>
+</body>
+
+</html>

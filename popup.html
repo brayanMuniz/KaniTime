@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+	<div class="container">
+		<div class="header">
+			<h1>🦀 KaniTime</h1>
+			<p class="subtitle">Earn internet time with WaniKani reviews!</p>
+		</div>
+
+		<!-- Time Display -->
+		<div class="time-section">
+			<div class="time-display">
+				<span class="time-label">Time Remaining:</span>
+				<span id="timeRemaining" class="time-value">00m 00s</span>
+			</div>
+			<div class="review-count">
+				<span id="reviewCount">Reviews Available: --</span>
+			</div>
+			<div id="timerStatus" class="timer-status">
+				<span id="timerText">Timer inactive</span>
+			</div>
+		</div>
+
+		<!-- Review Check Section -->
+		<div class="section">
+			<button id="checkReviews" class="primary-button">
+				📚 Check WaniKani Reviews
+			</button>
+			<p class="help-text">Earn 30 seconds per completed review!</p>
+		</div>
+
+		<!-- Blocked Sites Section -->
+		<div class="section">
+			<h3>Blocked Websites</h3>
+			<div class="password-section">
+				<input type="password" id="passwordInput" placeholder="Enter password to modify">
+				<button id="unlockBtn">Unlock</button>
+			</div>
+
+			<!-- This section is hidden when locked -->
+			<div id="blockedSitesControls" class="controls-hidden">
+				<div class="input-group">
+					<input type="text" id="newSiteInput" placeholder="example.com">
+					<button id="addSite">Add</button>
+				</div>
+				<ul id="blockedSitesList" class="sites-list"></ul>
+			</div>
+
+			<!-- Show locked message when controls are hidden -->
+			<div id="lockedMessage" class="locked-message">
+				<p>🔒 Enter password to view and modify blocked websites</p>
+				<p class="help-text">Password: <code>wanikani</code></p>
+			</div>
+		</div>
+
+		<!-- API Key Section -->
+		<div class="section">
+			<h3>WaniKani API Key</h3>
+			<div class="input-group">
+				<input type="password" id="apiKeyInput" placeholder="Enter your WaniKani API v2 key">
+				<button id="saveApiKey">Save</button>
+			</div>
+			<p class="help-text">
+				Get your API key from
+				<a href="https://www.wanikani.com/settings/personal_access_tokens" target="_blank">
+					WaniKani Settings
+				</a>
+			</p>
+		</div>
+
+		<!-- Status Messages -->
+		<div id="statusMessage" class="status-message"></div>
+	</div>
+
+	<script src="popup.js"></script>
+</body>
+
+</html>
