@@ -111,6 +111,9 @@ function toggleLock() {
 
 	if (!isUnlocked && password === BLOCK_PASSWORD) {
 		isUnlocked = true;
+		blockedSitesControls.classList.remove('controls-hidden');
+		lockedMessage.style.display = 'none';
+		passwordInput.value = '';
 		unlockBtn.textContent = 'Lock';
 		passwordInput.value = '';
 		passwordInput.placeholder = 'Unlocked ✓';
@@ -118,13 +121,14 @@ function toggleLock() {
 		showStatus('Blocked sites unlocked for modification', 'success');
 	} else if (isUnlocked) {
 		isUnlocked = false;
+		blockedSitesControls.classList.add('controls-hidden');
+		lockedMessage.style.display = '';
 		unlockBtn.textContent = 'Unlock';
-		passwordInput.placeholder = 'Enter password to modify';
+		passwordInput.placeholder = 'Enter wanikani to modify';
 		updateLockDisplay();
 		showStatus('Blocked sites locked', 'info');
 	} else {
 		showStatus('Incorrect password', 'error');
-		passwordInput.value = '';
 	}
 }
 

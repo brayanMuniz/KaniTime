@@ -259,10 +259,10 @@ button:hover {
   display: flex;
   gap: 8px;
   margin-bottom: 12px;
-  padding: 12px;
   background: #f8f9fa;
-  border-radius: 6px;
-  border-left: 3px solid #ffc107;
+  border-radius: 8px;
+  padding: 10px 12px;
+  align-items: center;
 }
 
 .password-section input {
@@ -271,13 +271,27 @@ button:hover {
 }
 
 .password-section button {
-  background: #ffc107;
-  color: #212529;
+  background: #667eea;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 20px;
+  font-size: 16px;
   font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
 .password-section button:hover {
-  background: #e0a800;
+  background: #5a67d8;
+}
+
+.password-section input[type="password"] {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 15px;
+  flex: 1;
 }
 
 .controls-hidden {
