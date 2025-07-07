@@ -23,7 +23,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 	// Initialize storage with default values
 	const data = await chrome.storage.local.get([
-		'apiKey', 'blockedSites', 'internetTime', 'lastReviewCount', 'currentReviewCount'
+		'apiKey', 'blockedSites', 'internetTime', 'lastReviewCount', 'currentReviewCount', 'reviewHistory'
 	]);
 
 	if (!data.blockedSites) {
@@ -37,6 +37,9 @@ chrome.runtime.onInstalled.addListener(async () => {
 	}
 	if (!data.currentReviewCount) {
 		await chrome.storage.local.set({ currentReviewCount: 0 });
+	}
+	if (!data.reviewHistory) {
+		await chrome.storage.local.set({ reviewHistory: {} });
 	}
 
 	// Set up periodic review checks
@@ -386,8 +389,8 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 // Check WaniKani reviews and award time
 async function checkWaniKaniReviews() {
 	try {
-		const { apiKey, lastReviewCount } = await chrome.storage.local.get([
-			'apiKey', 'lastReviewCount'
+		const { apiKey, lastReviewCount, reviewHistory } = await chrome.storage.local.get([
+			'apiKey', 'lastReviewCount', 'reviewHistory'
 		]);
 
 		if (!apiKey) {
@@ -439,6 +442,20 @@ async function checkWaniKaniReviews() {
 		// Store current review count for display
 		await chrome.storage.local.set({ currentReviewCount: currentReviewCount });
 
+		// --- Daily Review Tracking Logic ---
+		const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+		let history = reviewHistory || {};
+		let baselineSet = false;
+		if (!history[today]) {
+			// First check of the day: set baseline and reset completed
+			console.log(`[reviewHistory] Setting baseline for ${today}: baseline=${currentReviewCount}`);
+			history[today] = {
+				baseline: currentReviewCount,
+				completed: 0
+			};
+			baselineSet = true;
+		}
+
 		// Calculate completed reviews (decrease in available count)
 		if (lastReviewCount > 0 && currentReviewCount < lastReviewCount) {
 			const completedReviews = lastReviewCount - currentReviewCount;
@@ -447,12 +464,16 @@ async function checkWaniKaniReviews() {
 			const { internetTime } = await chrome.storage.local.get(['internetTime']);
 			const newTime = internetTime + timeEarned;
 
+			// Update daily completed count
+			history[today].completed += completedReviews;
+			console.log(`[reviewHistory] Incremented completed for ${today}: +${completedReviews}, total now ${history[today].completed}`);
+
 			await chrome.storage.local.set({
 				internetTime: newTime,
-				lastReviewCount: currentReviewCount
+				lastReviewCount: currentReviewCount,
+				reviewHistory: history
 			});
-
-			console.log(`🎉 Completed ${completedReviews} reviews, earned ${timeEarned}s! New total: ${newTime}s`);
+			console.log(`[reviewHistory] Wrote to storage:`, history);
 
 			// Send update to popup
 			sendToPopup('timeUpdated', {
@@ -463,9 +484,13 @@ async function checkWaniKaniReviews() {
 
 			return { success: true, earned: timeEarned, completedReviews: completedReviews };
 		} else {
-			// Update baseline count
-			await chrome.storage.local.set({ lastReviewCount: currentReviewCount });
-			console.log('📈 No new completed reviews detected');
+			// Always persist today's baseline/history, even if no reviews completed
+			await chrome.storage.local.set({ lastReviewCount: currentReviewCount, reviewHistory: history });
+			if (baselineSet) {
+				console.log(`[reviewHistory] Baseline set and written for ${today}:`, history[today]);
+			} else {
+				console.log(`[reviewHistory] No new completed reviews. Baseline/history written:`, history);
+			}
 			return { success: true, earned: 0, completedReviews: 0 };
 		}
 

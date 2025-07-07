@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>KaniTime Stats & History</title>
+	<link rel="stylesheet" href="popup.css">
+	<style>
+		.stats-container { max-width: 400px; margin: 32px auto 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 24px; }
+		#backToPopup { display: inline-block; margin-bottom: 18px; font-size: 15px; text-decoration: none; color: #667eea; }
+		#backToPopup:hover { text-decoration: underline; }
+	</style>
+</head>
+<body>
+	<div class="stats-container">
+		<a href="popup.html" id="backToPopup">← Back to Popup</a>
+		<h2 style="text-align:center; margin-bottom: 18px;">📈 Review Stats & History</h2>
+		<canvas id="reviewChart" width="350" height="220"></canvas>
+		<div id="noDataMsg" style="text-align:center; color:#888; margin-top:20px; display:none;">No review data yet. Do some reviews!</div>
+
+	</div>
+    <script src="chart.umd.min.js"></script>
+	<script src="index.js"></script>
+</body>
+</html> 

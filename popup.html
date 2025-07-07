@@ -33,6 +33,7 @@
 				📚 Check WaniKani Reviews
 			</button>
 			<p class="help-text">Earn 30 seconds per completed review!</p>
+			<div id="statusMessage"></div>
 		</div>
 
 		<!-- Blocked Sites Section -->
@@ -58,6 +59,10 @@
 				<p class="help-text">Password: <code>wanikani</code></p>
 			</div>
 		</div>
+		<!-- Link to Home/Stats Page (moved below Blocked Websites) -->
+		<div style="text-align:center; margin-bottom: 16px;">
+			<a href="index.html" id="statsLink" class="primary-button" style="font-size: 16px; padding: 8px 20px; text-decoration: none; display: inline-block;">📈 View Stats & History</a>
+		</div>
 
 		<!-- API Key Section -->
 		<div class="section">
@@ -73,9 +78,6 @@
 				</a>
 			</p>
 		</div>
-
-		<!-- Status Messages -->
-		<div id="statusMessage" class="status-message"></div>
 	</div>
 
 	<script src="popup.js"></script>
