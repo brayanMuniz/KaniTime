@@ -1,34 +1,19 @@
 // KaniTime Popup Script - Handles UI interactions and messaging
 
 // DOM elements
-let timeDisplay, reviewCountDisplay, apiKeyInput, saveApiKeyBtn, checkReviewsBtn;
-let newSiteInput, addSiteBtn, blockedSitesList, statusMessage;
-let passwordInput, unlockBtn, blockedSitesControls, lockedMessage;
+let timeDisplay, reviewCountDisplay, checkReviewsBtn;
 let timerStatusDiv, timerText;
 
 // State
-let isUnlocked = false;
-let currentBlockedSites = [];
 let isTimerActive = false;
 let port = null;
-const BLOCK_PASSWORD = 'wanikani';
 
 // Initialize popup when DOM loads
 document.addEventListener('DOMContentLoaded', async () => {
 	// Get DOM elements
 	timeDisplay = document.getElementById('timeRemaining');
 	reviewCountDisplay = document.getElementById('reviewCount');
-	apiKeyInput = document.getElementById('apiKeyInput');
-	saveApiKeyBtn = document.getElementById('saveApiKey');
 	checkReviewsBtn = document.getElementById('checkReviews');
-	newSiteInput = document.getElementById('newSiteInput');
-	addSiteBtn = document.getElementById('addSite');
-	blockedSitesList = document.getElementById('blockedSitesList');
-	statusMessage = document.getElementById('statusMessage');
-	passwordInput = document.getElementById('passwordInput');
-	unlockBtn = document.getElementById('unlockBtn');
-	blockedSitesControls = document.getElementById('blockedSitesControls');
-	lockedMessage = document.getElementById('lockedMessage');
 	timerStatusDiv = document.getElementById('timerStatus');
 	timerText = document.getElementById('timerText');
 	const exportReviewsBtn = document.getElementById('exportReviewsBtn');
@@ -37,17 +22,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 	}
 
 	// Set up event listeners
-	saveApiKeyBtn.addEventListener('click', saveApiKey);
 	checkReviewsBtn.addEventListener('click', checkReviews);
-	addSiteBtn.addEventListener('click', addBlockedSite);
-	unlockBtn.addEventListener('click', toggleLock);
 
-	newSiteInput.addEventListener('keypress', (e) => {
-		if (e.key === 'Enter' && isUnlocked) addBlockedSite();
-	});
-
-	passwordInput.addEventListener('keypress', (e) => {
-		if (e.key === 'Enter') toggleLock();
+	checkReviewsBtn.addEventListener('keypress', (e) => {
+		if (e.key === 'Enter' && isTimerActive) checkReviews();
 	});
 
 	// Connect to background script
@@ -57,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	await loadData();
 
 	// Set initial lock state
-	updateLockDisplay();
+	updateTimerStatus(false); // No longer relevant
 
 	// Add debug button
 	const debugBtn = document.createElement('button');
@@ -109,80 +87,6 @@ function connectToBackground() {
 	});
 }
 
-// Toggle lock/unlock for blocked sites
-function toggleLock() {
-	const password = passwordInput.value.trim();
-
-	if (!isUnlocked && password === BLOCK_PASSWORD) {
-		isUnlocked = true;
-		blockedSitesControls.classList.remove('controls-hidden');
-		lockedMessage.style.display = 'none';
-		passwordInput.value = '';
-		unlockBtn.textContent = 'Lock';
-		passwordInput.value = '';
-		passwordInput.placeholder = 'Unlocked ✓';
-		updateLockDisplay();
-		showStatus('Blocked sites unlocked for modification', 'success');
-	} else if (isUnlocked) {
-		isUnlocked = false;
-		blockedSitesControls.classList.add('controls-hidden');
-		lockedMessage.style.display = '';
-		unlockBtn.textContent = 'Unlock';
-		passwordInput.placeholder = 'Enter wanikani to modify';
-		updateLockDisplay();
-		showStatus('Blocked sites locked', 'info');
-	} else {
-		showStatus('Incorrect password', 'error');
-	}
-}
-
-// Update the display based on lock state
-function updateLockDisplay() {
-	if (isUnlocked) {
-		blockedSitesControls.className = 'controls-unlocked';
-		lockedMessage.style.display = 'none';
-		displayBlockedSites(currentBlockedSites);
-	} else {
-		blockedSitesControls.className = 'controls-hidden';
-		lockedMessage.style.display = 'block';
-	}
-}
-
-// Load data from storage and update UI
-async function loadData() {
-	try {
-		// Get status from background script
-		const response = await chrome.runtime.sendMessage({ type: 'getStatus' });
-
-		// Update time display
-		updateTimeDisplay(response.internetTime);
-
-		// Update review count display
-		updateReviewCount(response.currentReviewCount);
-
-		// Update timer status
-		updateTimerStatus(response.timerActive, response.activeTab);
-
-		// Load API key status
-		if (response.hasApiKey) {
-			apiKeyInput.placeholder = 'API key saved ✓';
-			checkReviewsBtn.disabled = false;
-		}
-
-		// Store blocked sites for later use
-		currentBlockedSites = response.blockedSites || [];
-
-		// Only display if unlocked
-		if (isUnlocked) {
-			displayBlockedSites(currentBlockedSites);
-		}
-
-	} catch (error) {
-		console.error('Error loading data:', error);
-		showStatus('Error loading extension data', 'error');
-	}
-}
-
 // Update time display with proper formatting
 function updateTimeDisplay(timeInSeconds) {
 	if (timeInSeconds === null || timeInSeconds === undefined) return;
@@ -219,41 +123,24 @@ function updateTimerStatus(active, hostname = null) {
 	}
 }
 
-// Save API key
-async function saveApiKey() {
-	const apiKey = apiKeyInput.value.trim();
-
-	if (!apiKey) {
-		showStatus('Please enter a valid API key', 'error');
-		return;
-	}
-
+// Restore loadData for popup functionality
+async function loadData() {
 	try {
-		// Test API key by making a request
-		const response = await fetch('https://api.wanikani.com/v2/user', {
-			headers: {
-				'Authorization': `Bearer ${apiKey}`,
-				'Wanikani-Revision': '20170710'
-			}
-		});
+		// Get status from background script
+		const response = await chrome.runtime.sendMessage({ type: 'getStatus' });
 
-		if (!response.ok) {
-			throw new Error('Invalid API key');
-		}
+		// Update time display
+		updateTimeDisplay(response.internetTime);
 
-		// Save API key
-		await chrome.storage.local.set({ apiKey: apiKey });
+		// Update review count display
+		updateReviewCount(response.currentReviewCount);
 
-		// Clear input and update UI
-		apiKeyInput.value = '';
-		apiKeyInput.placeholder = 'API key saved ✓';
-		checkReviewsBtn.disabled = false;
-
-		showStatus('API key saved successfully!', 'success');
+		// Update timer status
+		updateTimerStatus(response.timerActive, response.activeTab);
 
 	} catch (error) {
-		console.error('Error saving API key:', error);
-		showStatus('Invalid API key. Please check and try again.', 'error');
+		console.error('Error loading data:', error);
+		showStatus('Error loading extension data', 'error');
 	}
 }
 
@@ -285,104 +172,6 @@ async function checkReviews() {
 	}
 }
 
-// Add blocked site
-async function addBlockedSite() {
-	if (!isUnlocked) {
-		showStatus('Please unlock to modify blocked sites', 'error');
-		return;
-	}
-
-	const site = newSiteInput.value.trim().toLowerCase();
-
-	if (!site) {
-		showStatus('Please enter a website URL', 'error');
-		return;
-	}
-
-	// Remove protocol and www if present
-	const cleanSite = site.replace(/^https?:\/\//, '').replace(/^www\./, '');
-
-	try {
-		const data = await chrome.storage.local.get(['blockedSites']);
-		const blockedSites = data.blockedSites || [];
-
-		if (blockedSites.includes(cleanSite)) {
-			showStatus('Site already in blocked list', 'error');
-			return;
-		}
-
-		blockedSites.push(cleanSite);
-		await chrome.storage.local.set({ blockedSites: blockedSites });
-
-		newSiteInput.value = '';
-		currentBlockedSites = blockedSites;
-		displayBlockedSites(currentBlockedSites);
-		showStatus(`Added ${cleanSite} to blocked list`, 'success');
-
-	} catch (error) {
-		console.error('Error adding blocked site:', error);
-		showStatus('Error adding site to block list', 'error');
-	}
-}
-
-// Remove blocked site
-async function removeBlockedSite(site) {
-	if (!isUnlocked) {
-		showStatus('Please unlock to modify blocked sites', 'error');
-		return;
-	}
-
-	try {
-		const data = await chrome.storage.local.get(['blockedSites']);
-		const blockedSites = data.blockedSites || [];
-
-		const updatedSites = blockedSites.filter(s => s !== site);
-		await chrome.storage.local.set({ blockedSites: updatedSites });
-
-		currentBlockedSites = updatedSites;
-		displayBlockedSites(currentBlockedSites);
-		showStatus(`Removed ${site} from blocked list`, 'info');
-
-	} catch (error) {
-		console.error('Error removing blocked site:', error);
-		showStatus('Error removing site from block list', 'error');
-	}
-}
-
-// Display blocked sites list
-function displayBlockedSites(sites) {
-	// Only display if unlocked
-	if (!isUnlocked) return;
-
-	blockedSitesList.innerHTML = '';
-
-	if (!sites || sites.length === 0) {
-		const emptyItem = document.createElement('li');
-		emptyItem.className = 'site-item';
-		emptyItem.innerHTML = '<span style="color: #6c757d; font-style: italic;">No blocked sites</span>';
-		blockedSitesList.appendChild(emptyItem);
-		return;
-	}
-
-	sites.forEach(site => {
-		const listItem = document.createElement('li');
-		listItem.className = 'site-item';
-
-		const siteSpan = document.createElement('span');
-		siteSpan.className = 'site-url';
-		siteSpan.textContent = site;
-
-		const removeBtn = document.createElement('button');
-		removeBtn.className = 'remove-btn';
-		removeBtn.textContent = 'Remove';
-		removeBtn.addEventListener('click', () => removeBlockedSite(site));
-
-		listItem.appendChild(siteSpan);
-		listItem.appendChild(removeBtn);
-		blockedSitesList.appendChild(listItem);
-	});
-}
-
 // Debug function to show current tab info
 async function showDebugInfo() {
 	try {
@@ -412,13 +201,16 @@ function formatDuration(seconds) {
 
 // Show status message
 function showStatus(message, type) {
-	statusMessage.textContent = message;
-	statusMessage.className = `status-message ${type}`;
+	const statusMessage = document.getElementById('statusMessage');
+	if (statusMessage) {
+		statusMessage.textContent = message;
+		statusMessage.className = `status-message ${type}`;
 
-	// Auto-hide after 4 seconds
-	setTimeout(() => {
-		statusMessage.style.display = 'none';
-	}, 4000);
+		// Auto-hide after 4 seconds
+		setTimeout(() => {
+			statusMessage.style.display = 'none';
+		}, 4000);
+	}
 }
 
 // Export review history as a JSON file

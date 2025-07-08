@@ -48,17 +48,61 @@
 		}
 	</style>
 </head>
-<body>
-	<div class="stats-container">
-		<h2 style="text-align:center; margin-bottom: 18px;">📈 Review Stats & History</h2>
-		<canvas id="reviewChart"></canvas>
-		<div id="noDataMsg" style="text-align:center; color:#888; margin-top:20px; display:none;">No review data yet. Do some reviews!</div>
-		<div class="button-row" style="display: flex; justify-content: center; gap: 16px; margin-top: 32px;">
-			<button id="exportReviewsBtn" class="primary-button">⬇️ Export Reviews</button>
-			<button id="importReviewsBtn" class="primary-button">⬆️ Import Reviews</button>
-			<input type="file" id="importFileInput" accept="application/json" style="display:none;" />
+<body style="margin:0; padding:0; min-height:100vh; background:#f6f8fa;">
+	<div class="main-flex-container full-screen">
+		<div class="sidebar">
+			<button id="tabHistory" class="sidebar-tab active">📊 History</button>
+			<button id="tabSettings" class="sidebar-tab">⚙️ Settings</button>
 		</div>
-		<div id="importStatus" style="text-align:center; color:#667eea; margin-top:12px;"></div>
+		<div class="left-column">
+			<div id="settingsSection" style="display:none; flex-direction:row; gap:32px; height:100%; width:100%;">
+				<div class="settings-col settings-blocked">
+					<div class="section" style="margin-bottom: 32px;">
+						<h3>Blocked Websites</h3>
+						<div class="password-section">
+							<input type="password" id="passwordInput" placeholder="Enter wanikani to modify">
+							<button id="unlockBtn">Unlock</button>
+						</div>
+						<div id="blockedSitesControls" class="controls-hidden">
+							<div class="input-group">
+								<input type="text" id="newSiteInput" placeholder="example.com">
+								<button id="addSite">Add</button>
+							</div>
+							<ul id="blockedSitesList" class="sites-list"></ul>
+						</div>
+						<div id="lockedMessage" class="locked-message" style="display:none;">Enter password to unlock blocked sites.</div>
+					</div>
+				</div>
+				<div class="settings-col settings-api" style="display:flex; flex-direction:column; justify-content:flex-start;">
+					<div class="button-row" style="display: flex; gap: 16px; margin-bottom: 32px;">
+						<button id="exportReviewsBtn" class="primary-button">⬇️ Export Reviews</button>
+						<button id="importReviewsBtn" class="primary-button">⬆️ Import Reviews</button>
+						<input type="file" id="importFileInput" accept="application/json" style="display:none;" />
+					</div>
+					<div id="importStatus" style="text-align:left; color:#667eea; margin-bottom:24px;"></div>
+					<div class="section" style="margin-top: 0;">
+						<h3>WaniKani API Key</h3>
+						<div class="input-group">
+							<input type="password" id="apiKeyInput" placeholder="Enter your WaniKani API v2 key">
+							<button id="saveApiKey">Save</button>
+						</div>
+						<p class="help-text">
+							Get your API key from
+							<a href="https://www.wanikani.com/settings/personal_access_tokens" target="_blank">
+								WaniKani Settings
+							</a>
+						</p>
+					</div>
+				</div>
+			</div>
+			<div id="historySection" style="display:flex; flex-direction:column; height:100%; width:100%; align-items:center;">
+				<h2 style="text-align:center; margin-bottom: 18px;">📊 Settings & History</h2>
+				<div class="chart-container">
+					<canvas id="reviewChart"></canvas>
+				</div>
+				<div id="noDataMsg" style="text-align:center; color:#888; margin-top:20px; display:none;">No review data yet. Do some reviews!</div>
+			</div>
+		</div>
 	</div>
     <script src="chart.umd.min.js"></script>
 	<script src="index.js"></script>
