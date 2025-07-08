@@ -5,18 +5,54 @@
 	<title>KaniTime Stats & History</title>
 	<link rel="stylesheet" href="popup.css">
 	<style>
-		.stats-container { max-width: 400px; margin: 32px auto 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 24px; }
-		#backToPopup { display: inline-block; margin-bottom: 18px; font-size: 15px; text-decoration: none; color: #667eea; }
-		#backToPopup:hover { text-decoration: underline; }
+		body {
+			background: #f6f8fa;
+			margin: 0;
+			padding: 0;
+			min-height: 100vh;
+			font-family: 'Segoe UI', 'Arial', sans-serif;
+		}
+		.stats-container {
+			max-width: 800px;
+			margin: 48px auto 0 auto;
+			background: #fff;
+			border-radius: 16px;
+			box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+			padding: 48px 32px 40px 32px;
+		}
+		#reviewChart {
+			display: block;
+			margin: 0 auto;
+			max-width: 700px;
+			height: 400px !important;
+			background: #fff;
+			border-radius: 12px;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+		}
+		@media (max-width: 900px) {
+			.stats-container {
+				max-width: 98vw;
+				padding: 24px 2vw;
+			}
+			#reviewChart {
+				max-width: 98vw;
+			}
+		}
+		@media (max-width: 600px) {
+			.stats-container {
+				padding: 12px 1vw;
+			}
+			#reviewChart {
+				height: 220px !important;
+			}
+		}
 	</style>
 </head>
 <body>
 	<div class="stats-container">
-		<a href="popup.html" id="backToPopup">← Back to Popup</a>
 		<h2 style="text-align:center; margin-bottom: 18px;">📈 Review Stats & History</h2>
-		<canvas id="reviewChart" width="350" height="220"></canvas>
+		<canvas id="reviewChart"></canvas>
 		<div id="noDataMsg" style="text-align:center; color:#888; margin-top:20px; display:none;">No review data yet. Do some reviews!</div>
-
 	</div>
     <script src="chart.umd.min.js"></script>
 	<script src="index.js"></script>

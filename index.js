@@ -30,7 +30,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 					{
 						label: 'Reviews Completed',
 						data: completed,
-						backgroundColor: 'rgba(102, 126, 234, 0.7)'
+						backgroundColor: 'rgba(102, 126, 234, 0.7)',
+						barPercentage: 0.5,
+						categoryPercentage: 0.5
 					},
 					{
 						label: 'Baseline (Due at Start)',
@@ -45,10 +47,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 				]
 			},
 			options: {
-				responsive: false,
+				responsive: true,
+				maintainAspectRatio: false,
+				interaction: {
+					mode: 'index',
+					intersect: false
+				},
 				plugins: {
 					legend: { position: 'top' },
-					title: { display: false }
+					title: { display: false },
+					tooltip: {
+						position: 'nearest',
+						yAlign: 'top'
+					}
 				},
 				scales: {
 					y: {
