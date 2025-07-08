@@ -31,6 +31,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 	lockedMessage = document.getElementById('lockedMessage');
 	timerStatusDiv = document.getElementById('timerStatus');
 	timerText = document.getElementById('timerText');
+	const exportReviewsBtn = document.getElementById('exportReviewsBtn');
+	if (exportReviewsBtn) {
+		exportReviewsBtn.addEventListener('click', exportReviews);
+	}
 
 	// Set up event listeners
 	saveApiKeyBtn.addEventListener('click', saveApiKey);
@@ -88,11 +92,11 @@ function connectToBackground() {
 			case 'timeUpdated':
 				updateTimeDisplay(message.newTime);
 				if (message.earned > 0) {
-					showStatus(`🎉 Earned ${message.earned}s from ${message.completedReviews} completed reviews!`, 'success');
+					showStatus(`🎉 Earned ${formatDuration(message.earned)} from ${message.completedReviews} completed reviews!`, 'success');
 				}
 				if (message.spent > 0) {
 					updateTimerStatus(false);
-					showStatus(`⏰ Spent ${message.spent}s browsing ${message.hostname}`, 'info');
+					showStatus(`⏰ Spent ${formatDuration(message.spent)} browsing ${message.hostname}`, 'info');
 				}
 				break;
 		}
@@ -263,7 +267,7 @@ async function checkReviews() {
 
 		if (response.success) {
 			if (response.earned > 0) {
-				showStatus(`🎉 Completed ${response.completedReviews} reviews! Earned ${response.earned}s`, 'success');
+				showStatus(`🎉 Completed ${response.completedReviews} reviews! Earned ${formatDuration(response.earned)}`, 'success');
 			} else {
 				showStatus('Reviews checked! No new completed reviews found.', 'info');
 			}
@@ -397,6 +401,15 @@ async function showDebugInfo() {
 	}
 }
 
+// Converts seconds to a human-readable format (e.g., '5 minutes', '1 minute 30 seconds')
+function formatDuration(seconds) {
+	if (seconds < 60) return `${seconds} second${seconds === 1 ? '' : 's'}`;
+	const mins = Math.floor(seconds / 60);
+	const secs = seconds % 60;
+	if (secs === 0) return `${mins} minute${mins === 1 ? '' : 's'}`;
+	return `${mins} minute${mins === 1 ? '' : 's'} ${secs} second${secs === 1 ? '' : 's'}`;
+}
+
 // Show status message
 function showStatus(message, type) {
 	statusMessage.textContent = message;
@@ -406,4 +419,32 @@ function showStatus(message, type) {
 	setTimeout(() => {
 		statusMessage.style.display = 'none';
 	}, 4000);
+}
+
+// Export review history as a JSON file
+async function exportReviews() {
+	try {
+		const result = await chrome.storage.local.get(['reviewHistory']);
+		const reviewHistory = result.reviewHistory || {};
+		const json = JSON.stringify(reviewHistory, null, 2);
+		const blob = new Blob([json], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const now = new Date();
+		const yyyy = now.getFullYear();
+		const mm = String(now.getMonth() + 1).padStart(2, '0');
+		const dd = String(now.getDate()).padStart(2, '0');
+		const filename = `kanitime-reviews-${yyyy}${mm}${dd}.json`;
+
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+		showStatus('Review history exported!', 'success');
+	} catch (error) {
+		console.error('Export failed:', error);
+		showStatus('Failed to export review history', 'error');
+	}
 }

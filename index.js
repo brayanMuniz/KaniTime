@@ -73,4 +73,83 @@ document.addEventListener('DOMContentLoaded', async () => {
 			}
 		});
 	});
-}); 
+
+	// Export/Import buttons
+	const exportBtn = document.getElementById('exportReviewsBtn');
+	const importBtn = document.getElementById('importReviewsBtn');
+	const importInput = document.getElementById('importFileInput');
+	const importStatus = document.getElementById('importStatus');
+
+	if (exportBtn) {
+		exportBtn.addEventListener('click', exportReviews);
+	}
+	if (importBtn && importInput) {
+		importBtn.addEventListener('click', () => importInput.click());
+		importInput.addEventListener('change', handleImportFile);
+	}
+});
+
+// Export review history as a JSON file
+async function exportReviews() {
+	try {
+		const result = await chrome.storage.local.get(['reviewHistory']);
+		const reviewHistory = result.reviewHistory || {};
+		const json = JSON.stringify(reviewHistory, null, 2);
+		const blob = new Blob([json], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const now = new Date();
+		const yyyy = now.getFullYear();
+		const mm = String(now.getMonth() + 1).padStart(2, '0');
+		const dd = String(now.getDate()).padStart(2, '0');
+		const filename = `kanitime-reviews-${yyyy}${mm}${dd}.json`;
+
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+		showImportStatus('Review history exported!', true);
+	} catch (error) {
+		console.error('Export failed:', error);
+		showImportStatus('Failed to export review history', false);
+	}
+}
+
+// Handle import file selection
+async function handleImportFile(event) {
+	const file = event.target.files[0];
+	if (!file) return;
+	try {
+		const text = await file.text();
+		const imported = JSON.parse(text);
+		if (typeof imported !== 'object' || Array.isArray(imported)) throw new Error('Invalid file format');
+		const result = await chrome.storage.local.get(['reviewHistory']);
+		const current = result.reviewHistory || {};
+		const merged = { ...current };
+		for (const [date, data] of Object.entries(imported)) {
+			if (!merged[date] || (data.completed > (merged[date].completed || 0))) {
+				merged[date] = data;
+			}
+		}
+		await chrome.storage.local.set({ reviewHistory: merged });
+		showImportStatus('Review history imported successfully!', true);
+		// Optionally, reload the page or chart
+		setTimeout(() => window.location.reload(), 1200);
+	} catch (error) {
+		console.error('Import failed:', error);
+		showImportStatus('Failed to import review history: ' + error.message, false);
+	}
+}
+
+function showImportStatus(msg, success) {
+	const el = document.getElementById('importStatus');
+	if (el) {
+		el.textContent = msg;
+		el.style.color = success ? '#28a745' : '#dc3545';
+		if (success) {
+			setTimeout(() => { el.textContent = ''; }, 2000);
+		}
+	}
+} 
