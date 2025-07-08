@@ -50,7 +50,7 @@
 </head>
 <body style="margin:0; padding:0; min-height:100vh; background:#f6f8fa;">
 	<div class="main-flex-container full-screen">
-		<div class="sidebar">
+		<div class="sidebar wide-sidebar">
 			<button id="tabHistory" class="sidebar-tab active">📊 History</button>
 			<button id="tabSettings" class="sidebar-tab">⚙️ Settings</button>
 		</div>
@@ -97,10 +97,12 @@
 			</div>
 			<div id="historySection" style="display:flex; flex-direction:column; height:100%; width:100%; align-items:center;">
 				<h2 style="text-align:center; margin-bottom: 18px;">📊 Settings & History</h2>
-				<div class="chart-container">
+				<div class="chart-container wide-chart">
 					<canvas id="reviewChart"></canvas>
 				</div>
 				<div id="noDataMsg" style="text-align:center; color:#888; margin-top:20px; display:none;">No review data yet. Do some reviews!</div>
+				<div id="statsPanel" class="stats-panel"></div>
+				<div id="jlptPanel" class="jlpt-panel"></div>
 			</div>
 		</div>
 	</div>
